@@ -1,0 +1,17 @@
+%% CMPE 245 HW4-2
+% -------------------------
+% CMPE 245 - Spring, 2016
+% Written by Prof. 
+% 04/05/2016
+% MATLAB script for HW1 a
+% --------------------------
+function dCovX=dCovXfun(t,X)
+  P(1,1)=X(1,1);
+  P(1,2)=X(2,1);
+  P(2,1)=P(1,2);
+  P(2,2)=X(3,1);
+  A=[0 1; 0 -2];
+  Gamma=[0; 20];
+  dP=A*P+P*A'+Gamma*Gamma';
+  dCovX=[dP(1,1);dP(1,2);dP(2,2)];
+end

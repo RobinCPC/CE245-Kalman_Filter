@@ -1,0 +1,34 @@
+\documentclass{article}
+\usepackage{graphicx}
+
+\begin{document} 
+\begin{center}
+{\bf \Large  Homework 4} \\
+(Due on: May 9, 9:00PM, by e-mail)
+\end{center}
+
+\noindent {\bf Problem 1.} A linear system describing the dynamics of 
+$x_1(k)$ and $x_2(k)$ can be written as
+
+\begin{eqnarray}
+  x_1(k+1) &=& x_1(k)-0.8x_1(k)+0.4x_2(k)+w_1(k) \\
+  x_2(k+1) &=& x_2(k)-0.4x_1(k)+1+w_2(k) 
+\end{eqnarray}
+
+\noindent where $w_1(k)$, $w_2(k)$ are zero-mean value independent Gaussian random 
+variables with variance 1. The initial expected values are $\overline{x}_1(0) = 10$, 
+$\overline{x}_2(0) = 20$ and the covariance matrix of the vector $x(0) = [x_1(0)\ x_2(0)]^T$
+is $P(0) = diag(40, 40)$. Plot the evolution of the expected values for $k=0..14$. In a separate figure, plot the evolution of the variance corresponding to $x_1(k)$ and the one corresponding to $x_2(k)$, $k=0..14$.  \\ 
+
+
+\noindent {\bf Problem 2.} While moving, the position and velocity of a university campus bus along its route are described by the following stochastic differential equation
+\begin{eqnarray}
+  ds &=& vdt \\
+  dv &=& -2vdt+22dt+20dw 
+\end{eqnarray}
+
+\noindent where $s(t)$ is the distance traveled along the route and $v(t)$ is the bus velocity. The initial position of the bus at $t = 0$ is known with the variance $var(s(0)) =100$ and the velocity variance corresponds to its value at the steady state, i.e.,
+$var(v(0)) = \lim_{t \rightarrow \infty} var(v(t))$. The variables $s(0)$ and $v(0)$ are 
+independent at the time point $t = 0$. At what point of time $t^*$, the variance $var(s(t^*)) = 2var(s(0))$? Provide differential equations describing dynamics of the variances, derive the steady state of $var(v(t))$ and explain your conclusions. Numerical solutions are accepted.
+
+\end{document}
