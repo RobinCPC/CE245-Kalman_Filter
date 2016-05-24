@@ -1,0 +1,58 @@
+\documentclass{article}
+\usepackage{graphicx}
+
+\begin{document} 
+\begin{center}
+{\bf \Large  Homework 2} \\
+(Due on: Wed, April 15, 8:00PM)
+\end{center}
+
+\noindent {\bf Problem 1}. A stochastic process is defined as
+\begin{equation}
+ x_{k}=x_{k-1}+m_k,\ \ \ x_{0}=0
+\end{equation}
+where the random variable $m_k$ is defined by the probability density function $p(m_k)$
+\begin{equation}
+  p(m_{k}) \sim \left\{
+    \begin{array}{l}
+       0, \ \ \ m_k < -1/2 \\
+       4(m_k+1/2), \ \ \ -1/2 \le m_k < 0 \\
+       2-4m_k, \ \ \ 0 \le  m_k \le 1/2 \\
+       0, \ \ \ \ m_k > 1/2 \\
+    \end{array} \right.
+\end{equation}
+which is presented in the figure below. Find the expected value $E\{x_k\}$ and 
+the variance $E\{(x_k-\overline{x}_k)^2\}$ of this process.
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.3\textwidth]{HW3Fig1.png}
+\end{center}
+\end{figure}
+
+\noindent {\bf Problem 2} (only for graduate students) It is known that if 
+$x$ is a random variable with a pdf $p_x(x)$, i.e., $x \sim p_x(x)$,  
+and $y$ is a random variable $y \sim p_y(y)$, then 
+$z=x+y$ is a random variable $z \sim p_z(z)$, where $p_z(z)=p_x(x)*p_y(y)$. 
+The symbol  $*$ denotes the convolution, i.e.,
+\begin{equation}
+  p_z(z)=p_z(x+y)=\int_{-\infty}^\infty p_y(z-x)p_x(x)dx
+\end{equation}
+
+(a) If $m_k \sim p(m_k)$, where $p(m_k)$ is depicted  in
+ the figure, and $m_k=n+h$, figure out $p_n(n)$ and 
+$p_h(h)$. 
+
+(b) Use your conclusion from (a) to write a MATLAB code that
+generates the sequence from Problem 1. Generate the sequence 
+100 (or more) times and based on these sequences, verify the
+results obtained in Problem 1.
+
+\end{document}
+
+\[
+\int\limits_{ - 2}^2 {xdx}  = \frac{1}{2}x^2 
+\]
+
+\[
+\int\limits_{ - 2}^2 {xdx}  = \frac{1}{2}x^2 \left| {_{ - 2}^2 } \right.
+\]
