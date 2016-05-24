@@ -1,0 +1,72 @@
+\documentclass{article}
+\usepackage{graphicx}
+
+\begin{document} 
+\begin{center}
+{\bf \Large  Homework 5} \\
+(Due on: May 13, 9:00PM, by e-mail)
+\end{center}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=0.6\textwidth]{Fig.pdf}
+\end{center}
+\end{figure}
+
+\noindent The figure shows a robot moving left with the average velocity of $0.8cm/s$.
+While moving, it measures each second ($\Delta T = 1s$) the distance from the obstacle
+behind it (the corner) and the obstacle in front of it (the wall). In this scenario,
+we consider the corner as the reference point, i.e., with the coordinate 0. 
+In order to simultaneously estimate the robot position, as well
+as the position of the wall, we use the state vector $\underline{x}$ with three components: 
+$x_1$ is the roboti position measured from the corner, $x_2$ is the robot velocity with
+positive direction towards the wall and $x_3$ is the wall position measured from
+the corner.  $y_1$ is the measurement of the distance from the robot to the corner
+and $y_2$ is the measurement of the distance from the robot to the wall. A linear model describing this scenario is
+\begin{equation}
+  \underline{x}(k+1)=\left[ 
+  \begin{array}{ccc}
+     1 & 1 & 0  \\
+     0 & 0 & 0  \\
+     0 & 0 & 1 
+  \end{array}
+   \right] \underline{x}(k)+
+   \left[ 
+  \begin{array}{c}
+     0   \\
+     0.8   \\
+     0
+  \end{array}
+   \right]+ \left[
+     \begin{array}{c}
+     0   \\
+     0.1   \\
+     0
+  \end{array}
+   \right] w(k)
+\end{equation}
+where the Gaussian random variable $w(k)$ has zero mean and variance 1. 
+The observation model is
+\begin{equation}
+ \underline{y}(k) =\left[
+     \begin{array}{ccc}
+     1 & 0 &  0  \\
+     -1 & 0 & 1   
+  \end{array}
+   \right] \underline{x}(k)+\underline{\theta}(k)
+\end{equation}
+where the covariance matrix of Gaussian measurement noise $\underline{\theta}$ is $diag(10, 10)$. All variables in the above equations are expressed in $cm$ and $cm/s$. The course webpage provides you the sequence of the measurements $y_1$ and $y_2$ recorded for 
+$k = 1, 2,... $ in the fille {\bf roboMes.mat}. The data are organized in such a way that $y(1, k)$ denotes the measurement $y_1(k)$ and $y(2, k)$ denotes the measurement $y_2(k)$, where $k=1,2,3...$
+
+Design the Kalman filter that takes the measurement sequences and produces the estimation sequences of the robot position, its velocity and the distance between the wall and the corner.
+\begin{itemize}
+\item[a)] Plot the measurements on the same diagram. 
+\item[b)] Plot the estimated robot position and the corresponding variance. 
+\item[c)] Plot the estimated wall position and the corresponding variance. 
+\end{itemize}
+What is the precision in estimating the position of the robot and the wall ?
+Compare the precision to the intensity of measurement errors. Comment your
+results and trends in data.
+
+\end{document}
+
