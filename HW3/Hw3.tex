@@ -1,0 +1,60 @@
+\documentclass{article}
+\usepackage{graphicx}
+
+\begin{document} 
+\begin{center}
+{\bf \Large  Homework 3} \\
+(Due on: Fri, April 22, 8:00PM, by e-mail)
+\end{center}
+
+
+\noindent {\bf Problem 1.} A dynamical system is governed by the stochastic difference equation 
+\begin{equation}
+  \underline{x}(k+1)=\left[
+  \begin{array}{cc} 
+    1.5 & 1 \\
+   -0.7 & 0
+  \end{array}
+  \right] \underline{x}(k)+
+  \left[ 
+  \begin{array}{c}
+   1.0 \\
+   0.5 
+  \end{array}
+\right] w(k)
+\end{equation}
+
+\noindent where $w(k)$ is a sequence of independent Normal(mean=0,std=1) (Gaussian)
+random variables. \\
+
+\noindent a) Derive the expression for the state covariance and determine the state covariance in the steady state $P_{\infty}$. \\
+
+\noindent b) Write a MATLAB code that generates $\underline{x}(k)$ for $k = 1..500$ and 
+$\underline{x}(0) = [0\ 0]^T$. Generate five sequences of $\underline{x}(k)$ and plot them on two 
+diagrams, one for $x_1(k)$ and one for $x_2(k)$.  \\
+
+\noindent c) Generate 50 trajectories for $\underline{x}(k)$ and from them compute the 
+standard deviation for $x_1(k)$ and $x_2(k)$. \\
+
+\noindent d) Use the analytical results to compute the state $\underline{x}(k)$ covariance 
+matrix $P(k)$ and corresponding standard deviations for $x_1(k)$ and $x_2(k)$. 
+Compare them with the computed values  in point $c$. \\
+
+\noindent {\bf Problem 2.} (only for graduate students) A 2D random walk is described by the following system of 
+stochastic differential equations
+\begin{eqnarray}
+  dx&=&dw_1 \\
+  dy&=&dw_2
+\end{eqnarray}
+where $dw_1$ and $dw_2$ are increments of two independent unit intensity Wiener processes. \\
+ 
+\noindent (a) Use the initial condition $x(0)=y(0)=0$ to compute a trajectory $x(k\Delta T)$, $y(k \Delta T)$ for $\Delta T=0.1s$ and the final time point $T_f=10s$. Repeat the computations 
+100 times and plot all trajectories in the $x$-$y$ coordinate system. \\
+
+\noindent (b) For each trajectory, compute $r(k\Delta T)=\sqrt{x(k\Delta T)^2+y(k\Delta T)^2}$ 
+and their average for each $k$, $\overline{r}(k\Delta T)$. Plot on the same diagram  
+ $r(k\Delta T)$ versus the time in green, as well as  $\overline{r}(k\Delta T)$ in blue. \\
+
+\noindent (c) What polynomial is the best fit to $\overline{r}(k\Delta T)$?
+
+\end{document}
