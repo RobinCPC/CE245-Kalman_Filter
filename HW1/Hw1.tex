@@ -1,0 +1,45 @@
+\documentclass{article}
+\usepackage{graphicx}
+
+\begin{document} 
+\begin{center}
+{\bf \Large  Homework 1} \\
+(Due on: April 6 by 8:00PM)
+\end{center}
+
+\noindent A simple nonlinear model of pendulum dynamics is given by:
+\begin{equation}
+  m L \ddot{x}=-mg \sin x
+\end{equation}
+This second order differential equation can be re-written as a system of 
+differential equations
+\begin{eqnarray}
+ \dot{x}_1 &=& x_2 \\
+ \dot{x}_2 &=& -\frac{g}{L} \sin x_1,\ \ \ \ \ g/L=0.1
+\end{eqnarray}
+
+\noindent a) Use MATLAB function ode45 (or ode 23) to numerically solve the system of differential equations for the initial condition $x_1=\pi/6$, $x_2=0$ and plot diagrams for $x_1(t)$, $x_2(t)$ and $x_1(t)$ vs. $x_2(t)$. \\
+
+\noindent b) Let us consider the pendulum with a random acceleration term $f(t)$ 
+\begin{eqnarray}
+ \dot{x}_1 &=& x_2 \\
+ \dot{x}_2 &=& -\frac{g}{L} \sin x_1 + f(t),\ \ \ \ \ g/L=0.1
+\end{eqnarray}
+where the random acceleration term $f(t)$ is described as follows: $t_1$, $t_2$, ...$t_k$ are time 
+points of random events, such that the probability density function of time intervals
+$t_k-t_{k-1}$  is 
+\begin{equation}
+  p(t_{k}-t_{k-1})=\lambda e^{-\lambda(t_k-t_{k-1})},\ \ \ \lambda=0.02,  t_k > t_{k-1}, t_0=0
+\end{equation}
+and $f(t)=\sum_{k} f(t_k)\delta(t-t_k)$, $t_k>0$
+\begin{equation}
+ f(t_k) = \left\{ 
+  \begin{array}{ll}
+    0,& t \ne t_k \\
+    \varepsilon \sim \mathcal{N}(0,\sigma=0.2),& t = t_k 
+  \end{array} \right.
+\end{equation}  
+Numerically solve (4) and (5) for the initial condition $x_1=0$, $x_2=0$ and plot diagrams 
+for $x_1(t)$, $x_2(t)$ and $x_1(t)$ vs. $x_2(t)$.
+
+\end{document}
