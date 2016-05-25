@@ -42,31 +42,45 @@ H = [1 0 0;
 R = [10 0;
      0 10];
 
-% array to storge E{x_k} and P_k after update 
+% array to compute E{x_k} and P_k 
 Ex_k = zeros(3, length(y)+1);
 P_k = zeros(3, 3, length(y)+1);
+ 
+% array to storge E{x_k}(-) and P_k(-) before update (prior)
+Ex_kn = zeros(3, length(y)+1);
+P_kn = zeros(3, 3, length(y)+1);
+ 
+% array to storge E{x_k}(+) and P_k(+) after update (posterior) 
+Ex_kp = zeros(3, length(y)+1);
+P_kp = zeros(3, 3, length(y)+1);
 
 % array to storage E{x_k} and P_k before and after update
 Ex_arr = zeros(3, 2*length(y)+1);
 P_arr = zeros(3, 3, 2*length(y)+1);
 K_arr = zeros(3,2,length(y));   % storage KF Gain (for trends)
 
-% use kalman filter to compute estimation and the varinace
+% Do forward kalman filter to compute estimation and the varinace
 Ex_k(:,1) = x_0;
 P_k(:,:,1) = P_0;
+Ex_kn(:,1) = x_0;
+P_kn(:,:,1) = P_0;
+Ex_kp(:,1) = x_0;
+P_kp(:,:,1) = P_0;
 Ex_arr(:,1) = x_0;
 P_arr(:,:,1) = P_0;
 for k=1: length(y)
-    % prediction
+    % prediction (prior)
     Ex_k(:,k+1) = phi* Ex_k(:,k);
     P_k(:,:,k+1) = phi*P_k(:,:,k)*phi' + ga*Q*ga';
     
     Ex_arr(:,k*2) = Ex_k(:,k+1);
     P_arr(:,:,k*2) = P_k(:,:,k+1);
+    Ex_kn(:,k+1) = Ex_k(:,k+1);
+    P_kn(:,:,k+1) = P_k(:,:,k+1);
     
     % observation
 
-    % update and compute K and P(+)
+    % update and compute K and P(+) (posterior)
     K = P_k(:,:,k+1) * H'* inv(H*P_k(:,:,k+1)*H'+R);
     P_k(:,:,k+1) = (eye(3) - K*H)*P_k(:,:,k+1);
     
@@ -75,6 +89,8 @@ for k=1: length(y)
     K_arr(:,:,k) = K;
     Ex_arr(:,k*2+1) = Ex_k(:,k+1);
     P_arr(:,:,k*2+1) = P_k(:,:,k+1);
+    Ex_kp(:,k+1) = Ex_k(:,k+1);
+    P_kp(:,:,k+1) = P_k(:,:,k+1);
 end
 
 % plot expexted X1 and X3 (expect and update)
@@ -104,20 +120,18 @@ ylabel ('The variance of the positions (cm)');
 legend('show');
 
 
+% plot expexted X1 and X3 (only update)
+figure;
+plot(Ex_kp(1,:), 'DisplayName','Ex1');
+hold on
+plot(Ex_kp(3,:), 'r', 'DisplayName','Ex3');
+legend('show', 'Location', 'SouthEast');
 
-% % plot expexted X1 and X3 (only update)
-% figure;
-% plot(Ex_k(1,:), 'DisplayName','Ex1');
-% hold on
-% plot(Ex_k(3,:), 'r', 'DisplayName','Ex3');
-% legend('show', 'Location', 'SouthEast');
-% 
-% % plot variance X1 and X3
-% var_x1 = reshape(P_k(1,1,:), 1, []);
-% var_x3 = reshape(P_k(3,3,:), 1, []);
-% figure;
-% plot(var_x1, 'DisplayName','VARx1');
-% hold on
-% plot(var_x3, 'r', 'DisplayName','VARx3');
-% legend('show');
-
+% plot variance X1 and X3
+var_x1 = reshape(P_kp(1,1,:), 1, []);
+var_x3 = reshape(P_kp(3,3,:), 1, []);
+figure;
+plot(var_x1, 'DisplayName','VARx1');
+hold on
+plot(var_x3, 'r', 'DisplayName','VARx3');
+legend('show');
