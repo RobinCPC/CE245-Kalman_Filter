@@ -22,7 +22,7 @@ behind it (the corner) and the obstacle in front of it (the wall). In this scena
 we consider the corner as the reference point, i.e., with the coordinate 0. 
 In order to simultaneously estimate the robot position, as well
 as the position of the wall, we use the state vector $\underline{x}$ with three components: 
-$x_1$ is the roboti position measured from the corner, $x_2$ is the robot velocity with
+$x_1$ is the robot position measured from the corner, $x_2$ is the robot velocity with
 positive direction towards the wall and $x_3$ is the wall position measured from
 the corner.  $y_1$ is the measurement of the distance from the robot to the corner
 and $y_2$ is the measurement of the distance from the robot to the wall. A linear model describing this scenario is
@@ -59,7 +59,7 @@ The observation model is
    \right] \underline{x}(k)+\underline{\theta}(k)
 \end{equation}
 where the covariance matrix of Gaussian measurement noise $\underline{\theta}$ is $diag(10, 10)$. All variables in the above equations are expressed in $cm$ and $cm/s$. The course webpage provides you the sequence of the measurements $y_1$ and $y_2$ recorded for 
-$k = 1, 2,... $ in the fille {\bf roboMes.mat}. The data are organized in such a way that $y(1, k)$ denotes the measurement $y_1(k)$ and $y(2, k)$ denotes the measurement $y_2(k)$, where $k=1,2,3...$
+$k = 1, 2,... $ in the file {\bf roboMes.mat}. The data are organized in such a way that $y(1, k)$ denotes the measurement $y_1(k)$ and $y(2, k)$ denotes the measurement $y_2(k)$, where $k=1,2,3...$
 
 Design the Kalman filter that takes the measurement sequences and produces the estimation sequences of the robot position, its velocity and the distance between the wall and the corner.
 \begin{itemize}
