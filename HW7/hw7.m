@@ -21,26 +21,26 @@ legend('show', 'Location', 'SouthEast');
 
 % setting initial x_0, P_0 
 %x_0 = [40; 0; 200]; % my first guess. (integer according y1(0) and y2(0))
-x_0 = [y(1,1); 0.8; y(1,1)+y(2,1)]; % more reasoning guess (after course)
+x_0 = [y(1,1); 1.6; y(1,1)+y(2,1)]; % more reasoning guess (after course)
 % P_0 = [10 0 0;
 %         0 0 0;    % my first guess. (set as variance of the measurement 
 %         0 0 10];  % for P11 P33. and set others as zeros)
 P_0 = [10 0 10;
-        0 0.1^2 0;
+        0 1 0;
         10 0 10*2];
     
 % setting some constant matrix in kalman filter (phi, gamma, H, R, Q)
 phi = [1 1 0;
-       0 0 0;
+       0 1 0;
        0 0 1];
 ga = [0 0.1 0]';
-u = [ 0 0.8 0]';
+%u = [ 0 0.8 0]';
+Q = 1;
 
 H = [1 0 0;
     -1 0 1];
 R = [10 0;
      0 10];
-Q = 1;
 
 % array to storge E{x_k} and P_k after update 
 Ex_k = zeros(3, length(y)+1);
@@ -58,8 +58,7 @@ Ex_arr(:,1) = x_0;
 P_arr(:,:,1) = P_0;
 for k=1: length(y)
     % prediction
-    %Ex_k(:,k) = phi* Ex_k(:,k);
-    Ex_k(:,k+1) = phi* Ex_k(:,k) + u;
+    Ex_k(:,k+1) = phi* Ex_k(:,k);
     P_k(:,:,k+1) = phi*P_k(:,:,k)*phi' + ga*Q*ga';
     
     Ex_arr(:,k*2) = Ex_k(:,k+1);
