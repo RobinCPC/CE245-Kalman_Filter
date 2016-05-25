@@ -93,6 +93,25 @@ for k=1: length(y)
     P_kp(:,:,k+1) = P_k(:,:,k+1);
 end
 
+
+% Do kalman smoother
+% array to compute E{x_k} and P_k 
+Ex_ks = zeros(3, length(y)+1);
+P_ks = zeros(3, 3, length(y)+1);
+
+Ex_ks(:,1) = x_0;
+P_ks(:,:,1) = P_0;
+
+Ex_ks(:, end) = Ex_kp(:, end);
+P_ks(:,:, end) = P_kp(:, :, end);
+
+for k = length(y):-1:1
+    A_k = P_kp(:, :, k)*phi'*inv(P_kn(:, :, k+1));
+    
+    Ex_ks(:,k) = Ex_kp(:,k) + A_k*( Ex_ks(:,k+1) - Ex_kn(:,k+1) );
+    P_ks(:,:,k) = P_kp(:,:,k) + A_k*( P_ks(:,:,k+1) - P_kn(:,:,k+1) )*A_k';
+end
+
 % plot expexted X1 and X3 (expect and update)
 t = (0:0.5:100);
 figure;
@@ -135,3 +154,11 @@ plot(var_x1, 'DisplayName','VARx1');
 hold on
 plot(var_x3, 'r', 'DisplayName','VARx3');
 legend('show');
+
+
+% plot smoothing X1 and X3
+figure;
+plot(Ex_ks(1,:), 'DisplayName','smoothing Ex1');
+hold on
+plot(Ex_ks(3,:), 'r', 'DisplayName','smoothing Ex3');
+legend('show', 'Location', 'SouthEast');
