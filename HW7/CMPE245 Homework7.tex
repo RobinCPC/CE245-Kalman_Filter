@@ -1,0 +1,79 @@
+\documentclass{article}
+\usepackage{graphicx}
+
+\begin{document} 
+\begin{center}
+{\bf \Large  Homework 7} \\
+\end{center}
+Chien-Pin Chen
+cchen144
+
+The HW6 figure shows a robot moving left. While moving, it measures each second ($\Delta T$ = 1s) the distance from the obstacle behind it (the corner) and the obstacle
+in front of it (the wall). In this scenario, we consider the corner as the reference
+point, i.e., with the coordinate 0. As shown in class, in order to simultaneously
+estimate the robot position and the position of the wall, we use the state vector
+$\underline{x}$ with the following three components: $x_1$ is the robot position measured from
+the corner, $x_2$ is the robot velocity with the positive direction towards the wall
+and $x_3$ is the wall position measured from the corner. The measurement $y_1$ is
+the distance from the robot to the corner and $y_2$ is the distance from the robot
+to the wall. A linear model describing this scenario is
+\begin{equation}
+  \underline{x}(k+1)=\left[ 
+  \begin{array}{ccc}
+     1 & 1 & 0  \\
+     0 & 1 & 0  \\
+     0 & 0 & 1 
+  \end{array}
+   \right] \underline{x}(k)+ \left[
+     \begin{array}{c}
+     0   \\
+     0.1   \\
+     0
+  \end{array}
+   \right] w(k)
+\end{equation}
+where the Gaussian random variable w(k) has zero mean and variance 1. The
+observation model is
+\begin{equation}
+ \underline{y}(k) =\left[
+     \begin{array}{ccc}
+     1 & 0 &  0  \\
+     -1 & 0 & 1   
+  \end{array}
+   \right] \underline{x}(k)+\underline{\theta}(k)
+\end{equation}
+where the covariance matrix of Gaussian measurement noise $\underbar{$\theta$}$ 
+is $diag(10, 10)$. All variables in the above equations are expressed in $cm$ and $cm=s$.
+
+The course webpage (HW6) provides you the sequence of the measurements
+$y_1$ and $y_2$ recorded for $k = 1, 2,...$ in the fille roboMes.mat. The data are
+organized so that $y(1, k)$ denotes the measurement $y_1(k)$ and $y(2, k)$ 
+denotes the measurement $y_2(k)$, where $k=1,2,3....$. 
+
+Design the Kalman smoother that takes the measurement sequences and
+produces the estimation sequences of the robot position, its velocity and the
+distance between the wall and the corner given all available data. \\
+
+a) Plot on the same diagram the result of the forward Kalman filter and
+RTS backward iterations for {\bf the robot position}.
+
+b) Plot on the same diagram the result of the forward Kalman filter and
+RTS backward iterations for {\bf the robot velocity}.
+
+d) Plot on the same diagram the result of the forward Kalman filter and
+RTS backward iterations for {\bf the wall position}.
+
+e) For the robot position, compare the variance resulting from the Kalman
+filter and the variance resulting from the smoother.
+
+Comment your results and trends in data. {\bf Note:} Please keep in mind that
+you can use your Kalman filter code from HW6 with a slight modification, i.e.,
+after removing 0.8 in the equation defining the velocity. Choose your initial
+condition for $x_1(0)$ and $x_3(0)$, as well as corresponding variances the 
+same way you did for the Kalman filter in HW6. {\bf However, for $x_2(0)$ use the 
+initial condition $0.2$ or $1.6$ and the variance $1$.}
+
+\textbf{ANS:}\\
+
+
+\end{document}
