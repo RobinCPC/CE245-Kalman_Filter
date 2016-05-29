@@ -1,12 +1,14 @@
 \documentclass{article}
 \usepackage{graphicx}
+\usepackage{float}
+\usepackage{epstopdf}
 
 \begin{document} 
 \begin{center}
 {\bf \Large  Homework 7} \\
 \end{center}
-Chien-Pin Chen
-cchen144
+Chien-Pin Chen\\
+cchen144\\
 
 The HW6 figure shows a robot moving left. While moving, it measures each second ($\Delta T$ = 1s) the distance from the obstacle behind it (the corner) and the obstacle
 in front of it (the wall). In this scenario, we consider the corner as the reference
@@ -73,7 +75,82 @@ condition for $x_1(0)$ and $x_3(0)$, as well as corresponding variances the
 same way you did for the Kalman filter in HW6. {\bf However, for $x_2(0)$ use the 
 initial condition $0.2$ or $1.6$ and the variance $1$.}
 
-\textbf{ANS:}\\
+\noindent \textbf{ANS:}\\
+For forward Kalman filter, I could use equations from homework 5 with slightly modify:
+\begin{eqnarray}
+x_{k + 1}  = \Phi x_k  + \Gamma w_k \\
+y_k  = {\rm H}x_k  + v_k 
+\end{eqnarray}
+then, for computing in homework 7, I could set:
+\begin{eqnarray}
+\Phi  = \left[ {\begin{array}{*{20}c}
+   1 & 1 & 0  \\
+   0 & 0 & 0  \\
+   0 & 0 & 1  \\
+\end{array}} \right],{\rm{ }}\Gamma  = \left[ {\begin{array}{*{20}c}
+   0  \\
+   {0.1}  \\
+   0  \\
+\end{array}} \right],{\rm{ and }}Q = {\mathop{\rm var}} (w(k)) = 1\\
+{\rm H} = \left[ {\begin{array}{*{20}c}
+   {\begin{array}{*{20}c}
+   1 & 0 & 0  \\
+\end{array}}  \\
+   {\begin{array}{*{20}c}
+   { - 1} & 0 & 1  \\
+\end{array}}  \\
+\end{array}} \right],{\rm{ and }}R = {\mathop{\rm var}} (\theta (k)) = \left[ {\begin{array}{*{20}c}
+   {10} & 0  \\
+   0 & {10}  \\
+\end{array}} \right]
+\end{eqnarray}
+Now, I could use the same steps in homework 5 for computing forward Kalman filter in MATLAB.
+After forward Kalman filter, I get the sequence of the result of $\underline{\hat{x}}_k$ and $\underline{\hat{P}}_k$, and 
+I could use the last elements in both sequence as initial value (condition) to do Kalman smoother with RTS algorithms:
+\begin{eqnarray}
+\underline{\hat{x}}_{k\left| N \right.}  = \underline{\hat{x}}_k ( + ) + A_k (\underline{\hat{x}}_{k + 1\left| N \right.}  - \underline{\hat{x}}_{k + 1} ( - )), \; \underline{\hat{x}}_{N\left| N \right.}  = \underline{\hat{x}}_N ( + )\\
+\underline{A}_k  = \underline{P}_k ( + )\Phi _k^T \underline{P}_{k + 1}^{ - 1} ( - )\\
+\underline{P}_{k\left| N \right.}  = \underline{P}_k ( + ) + \underline{A}_k (\underline{P}_{k + 1\left| N \right.}  - \underline{P}_{k + 1} ( - ))\underline{A}_k^T , \;  \underline{P}_{N\left| N \right.}  = \underline{P}_N ( + )
+\end{eqnarray} 
+And, after computing Kalman smoother and forward Kalman filter, I could plot the results as below:\\
+\textbf{(a)} The diagram of results of the robot position.\\
+From the below diagram, the result of Kalman smoother is smooth and each data point is not diverse a lot from the real data. 
 
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.6]{hw7_x1.eps}
+\end{center}
+\end{figure}
+
+\textbf{(b)}The diagram of results of the robot velocity.\\
+The result of velocity is also smooth, but it has more obviously turning curve. And, as indicated in "Applied Optimal Estimation",
+the result of smoother tends to lag (from backward) the measurement data whenever it has large changing curve.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.6]{hw7_x2.eps}
+\end{center}
+\end{figure}
+
+\noindent \textbf{(d)} The diagram of results of the wall position.\\
+The result of wall position, after Kalman smoother, is fixed even when the measurement data are fluctuated.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.6]{hw7_x3.eps}
+\end{center}
+\end{figure}
+
+\noindent \textbf{(e)} The diagram of results of the variance of the robot position\\
+From the below results, the variance from forward Kalman filter start to decrease and converge after 30 second.
+And, for RTS backward smoother, the variance start to decrease from 100 second and converge after 90 second.
+Although the variance of the backward after 10 second start to increase, it is still smaller than the variance of forward 
+in the same time interval.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.6]{hw7_varx13.eps}
+\end{center}
+\end{figure}
 
 \end{document}
