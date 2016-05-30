@@ -18,11 +18,26 @@ plot( z_k(:,1), z_k(:,2));
 %%  EKF
 T = 1/3;   % 30 frames per sec, data are acquired per 10 frames
 
-b = [0 0 1 1]';
+% f = [x3*cos(x4); x3*sin(x4); 0; 0];
+% phi = [0, 0, cos(x4), -x3*sin(x4);
+%      0, 0, sin(x4), x3*cos(x4);
+%      0, 0, 0, 0;
+%      0, 0, 0, 0];
 
+b = [0 0 1 1]';
+ga = [1 0 0 0;
+      0 1 0 0;
+      0 0 1 0;
+      0 0 0 1];
+
+H = [1 0 0 0;
+     0 1 0 0];
 R = [12.25 0;
      0 12.25]; % do we get this ?? or guess by ourself
 
+ Q = 1;
+ 
+% setting initial x_0, P_0  
 x0 = z_k(1,1);
 y0 = z_k(1,2);
 v0 = 6;     % (z_k(2,1)-z_k(1,1)) / 0.3 
@@ -67,14 +82,24 @@ tot_X=X_in';
 
 for k = 1 : length(z_k)
     % prediction
-    [t, solXs] = ode45(@dPredictFunc, [(k-1)*T k*T], X_in);
-     solX = solXs(end,:)';
-     Ex_k(:,k+1) = [solX(1);  solX(2); solX(3); wrapToPi(solX(4))];
-     
-     P_k(:,:,k+1) = [solX(5)  solX(9)  solX(10) solX(11); 
-                     solX(9)  solX(6)  solX(12) solX(13);
-                     solX(10) solX(12) solX(7)  solX(14);
-                     solX(11) solX(13) solX(14) solX(8)];
+%     [t, solXs] = ode45(@dPredictFunc, [(k-1)*T k*T], X_in);
+%     solX = solXs(end,:)';
+%     Ex_k(:,k+1) = [solX(1);  solX(2); solX(3); wrapToPi(solX(4))];
+% 
+%     P_k(:,:,k+1) = [solX(5)  solX(9)  solX(10) solX(11); 
+%                  solX(9)  solX(6)  solX(12) solX(13);
+%                  solX(10) solX(12) solX(7)  solX(14);
+%                  solX(11) solX(13) solX(14) solX(8)];
+    x3 = Ex_k(3, k);
+    x4 = Ex_k(4, k);
+    f = [x3*cos(x4); x3*sin(x4); 0; 0];
+    phi = [0, 0, cos(x4), -x3*sin(x4);
+         0, 0, sin(x4), x3*cos(x4);
+         0, 0, 0, 0;
+         0, 0, 0, 0];
+    Ex_k(:, k+1) = f;
+    P_k(:,:,k+1) = phi*P_k(:,:,k)*phi'+ ga*Q*ga';
+    
     % observation
     H = [1 0 0 0;
          0 1 0 0];
@@ -82,7 +107,7 @@ for k = 1 : length(z_k)
     %update K and P(+)
     K = P_k(:,:,k+1) * H'* inv(H*P_k(:,:,k+1)*H'+R);
     P_k(:,:,k+1) = (eye(4) - K*H)*P_k(:,:,k+1);
-    Ex_k(:,k+1) = Ex_k(:,k+1) + K*(z_k(k,:)' - [Ex_k(1,k+1); Ex_k(2,k+1)]);
+    Ex_k(:,k+1) = Ex_k(:,k+1) + K*(z_k(k,:)' - H*Ex_k(:,k+1));
     
     X_in = [Ex_k(1,k+1); Ex_k(2,k+1); Ex_k(3,k+1); wrapToPi(Ex_k(4,k+1)); 
             P_k(1,1,k+1); P_k(2,2,k+1); P_k(3,3,k+1); P_k(4,4,k+1);
@@ -90,19 +115,21 @@ for k = 1 : length(z_k)
             P_k(2,4,k+1); P_k(3,4,k+1)];
     
     % collecting all ode results
-    tot_T = cat(1, tot_T, t(2:end));
-    tot_X = cat(1, tot_X, solXs(2:end, :));
-    if k == 45
-        break;
-    end
+%     tot_T = cat(1, tot_T, t(2:end));
+%     tot_X = cat(1, tot_X, solXs(2:end, :));
+%     if k == 45
+%         break;
+%     end
 end
 
 % ploting measurement x_m and the EKF estimated x(t)
 t = (0: T: T* length(z_k));
 
 hold on
-plot(tot_X(:,1),tot_X(:,2), 'r')
-figure
-plot(tot_T,tot_X(:,3), 'g')
-figure
-plot(tot_T,tot_X(:,4), 'k')
+% plot(tot_X(:,1),tot_X(:,2), 'r')
+% figure
+% plot(tot_T,tot_X(:,3), 'g')
+% figure
+% plot(tot_T,tot_X(:,4), 'k')
+
+plot(Ex_k(1,:),Ex_k(2,:), 'r');
