@@ -102,3 +102,7 @@ t = (0: T: T* length(z_k));
 
 hold on
 plot(tot_X(:,1),tot_X(:,2), 'r')
+figure
+plot(tot_T,tot_X(:,3), 'g')
+figure
+plot(tot_T,tot_X(:,4), 'k')
