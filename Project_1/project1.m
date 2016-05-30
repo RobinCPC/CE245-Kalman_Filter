@@ -20,8 +20,8 @@ T = 1/3;   % 30 frames per sec, data are acquired per 10 frames
 
 b = [0 0 1 1]';
 
-R = [0 12.25;
-     12.25 0]; % do we get this ?? or guess by ourself
+R = [12.25 0;
+     0 12.25]; % do we get this ?? or guess by ourself
 
 x0 = z_k(1,1);
 y0 = z_k(1,2);
