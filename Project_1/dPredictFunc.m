@@ -8,7 +8,7 @@
 function dECovX = dPredictFunc(t, Z)
 % setting initial value
 b = [0; 0; 1; 1];
-intensity = 1;
+intensity = 12.25^2;
 
 
 % compute A(t) (use symbolic to derive first)

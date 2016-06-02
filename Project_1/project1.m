@@ -9,12 +9,16 @@ clear all;
 
 % setting prediction function (continue or discrete)
 is_cont = 0;    % 1=true; 0=false
+is_sof = 0;     % use second order filter
 
+light_noise = 0.364;
+mea_var = 3 * ((light_noise)^2)/9;
 
 % read the measurement data
 z_k = load('XYData_cm.csv'); %xlsread('XYData_cm.csv'); % another functio to use: dataset
 th_k = load('HEadingAngle_rad.csv');
 
+figure;
 plot( z_k(:,1), z_k(:,2));
 
 %%  EKF
@@ -31,27 +35,27 @@ ga = [ 0 0;
        0 0;
        1 0;
        0 1];
-Q = [1.225*sqrt(T) 0;
-     0 1.225*sqrt(T)];
+Q = [0.1*T 0;
+     0 0.1*T]; % if Q too small, sof will fail
    
 H = [1 0 0 0;
      0 1 0 0];
 R = [1.225 0;
-     0 1.225]; % do we get this ?? or guess by ourself
+     0 1.225]; % if R too small, sof will fail
 
  
 % setting initial x_0, P_0  
 x0 = z_k(1,1);
 y0 = z_k(1,2);
-v0 = (z_k(2,1)-z_k(1,1)) / T;
+v0 = sqrt( (z_k(2,1)-z_k(1,1))^2 + (z_k(2,2)-z_k(1,2))^2 )/ T;
 theta0 = atan2( (z_k(2,2)-z_k(1,2)), (z_k(2,1)-z_k(1,1))  );
 
 Ex0 = [ x0 y0 v0 theta0 ]';   %
 
-P11 = 1.225; %0.0328;    % var{x}
+P11 = 0.0640/1; %0.0328;    % var{x}
 P22 = P11;    % var{y}
-P33 = 2*P11/T;    % var{v}
-P44 = (10*pi/180)^2 %(180/pi)*2*P11;    % var{theta}
+P33 = 2*P11/T^2;    % var{v}
+P44 = (10*pi/180)^2 %(180/pi)*2*P11;    % var{theta} angle_variance
 P12 = 0;
 P13 = P11;
 P14 = P11;
@@ -108,8 +112,32 @@ for k = 1 : length(z_k)
              0, 0, T*sin(x4), T*x3*cos(x4);
              0, 0, 1, 0;
              0, 0, 0, 1];
-        Ex_k(:, k+1) = Ex_k(:, k)+f;         % ? is this correct?
-        P_k(:,:,k+1) = phi*P_k(:,:,k)*phi'+ ga*Q*ga';
+        
+        F1_k = [0 0 0 0;
+                0 0 0 0;
+                0 0 0 -T*sin(x4);
+                0 0 -T*sin(x4) -T*x3*cos(x4)]; 
+        
+        F2_k = [0 0 0 0;
+                0 0 0 0;
+                0 0 0 T*cos(x4);
+                0 0 T*cos(x4) -T*x3*sin(x4)];
+            
+        F3_k = zeros(4);
+        F4_k = zeros(4);
+        e1 = [1 0 0 0]';
+        e2 = [0 1 0 0]';
+        e3 = [0 0 1 0]';
+        e4 = [0 0 0 1]';
+        bk = (1/2)*( e1*0.5*trace(F1_k*P_k(:,:,k)) + e2*0.5*trace(F2_k*P_k(:,:,k)) );
+        
+        if is_sof
+            Ex_k(:, k+1) = Ex_k(:, k)+f+bk;
+            P_k(:,:,k+1) = phi*P_k(:,:,k)*phi'+ ga*Q*ga';
+        else
+            Ex_k(:, k+1) = Ex_k(:, k)+f;         % ? is this correct?
+            P_k(:,:,k+1) = phi*P_k(:,:,k)*phi'+ ga*Q*ga';
+        end
     end
     
     % observation
@@ -117,14 +145,22 @@ for k = 1 : length(z_k)
          0 1 0 0];
     
     %update K and P(+)
-    K = P_k(:,:,k+1) * H'* inv(H*P_k(:,:,k+1)*H'+R);
-    P_k(:,:,k+1) = (eye(4) - K*H)*P_k(:,:,k+1);
-    Ex_k(:,k+1) = Ex_k(:,k+1) + K*(z_k(k,:)' - H*Ex_k(:,k+1));
-    Ex_k(4,k+1) = wrapToPi(Ex_k(4,k+1));
+    if is_sof
+        S = zeros(2);
+        K = P_k(:,:,k+1) * H'*inv(R + S);
+        P_k(:,:,k+1) = P_k(:,:,k+1)-P_k(:,:,k+1)*H'*inv(H*P_k(:,:,k+1)*H'+R+S)*H*P_k(:,:,k+1);
+        Ex_k(:,k+1) = Ex_k(:,k+1) + K*(z_k(k,:)' - H*Ex_k(:,k+1));
+        Ex_k(4,k+1) = wrapToPi(Ex_k(4,k+1));
+    else
+        K = P_k(:,:,k+1) * H'* inv(H*P_k(:,:,k+1)*H'+R);
+        P_k(:,:,k+1) = (eye(4) - K*H)*P_k(:,:,k+1);
+        Ex_k(:,k+1) = Ex_k(:,k+1) + K*(z_k(k,:)' - H*Ex_k(:,k+1));
+        Ex_k(4,k+1) = wrapToPi(Ex_k(4,k+1));
+    end
     
     % compute velocity from measurement
     if k >=2
-        v_k(1,k) = (z_k(k,1) - z_k(k-1,1))/T;
+        v_k(1,k) = sqrt( (z_k(k,1)-z_k(k-1,1))^2 + (z_k(k,2)-z_k(k-1,2))^2 )/T;
     end
     
     if is_cont
@@ -137,7 +173,7 @@ for k = 1 : length(z_k)
         tot_T = cat(1, tot_T, t(2:end));
         tot_X = cat(1, tot_X, solXs(2:end, :));
     end
-%     if k == 45
+%     if k == 7
 %         break;
 %     end
 end
