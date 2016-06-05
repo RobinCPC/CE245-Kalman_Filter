@@ -1,4 +1,4 @@
-%% Project 2
+%% Project 2  Part1 and 2
 % -------------------------
 % CMPE 245 - Spring, 2016
 % Chien-Pin Chen
@@ -64,6 +64,8 @@ Px0(6,3) = Px0(3,6);
 % array to storge E{x_k} and P_k after update 
 Ex_k = zeros(length(Ex0), length(xm)+1);
 P_k = zeros(length(Ex0), length(Ex0), length(xm)+1);
+S = 0;  % compute c0 part2
+i_sum = 0;
 
 % Use Extend Kalman Filter (EKF)
 Ex_k(:,45) = Ex0;
@@ -87,9 +89,9 @@ for k = 45 : length(zm)
     dt = dtrec(k);
     
     s = (255/6000) * thrust(k);
-    c0 = 1;%100000000*5;
+    c0 = 1000000; % Part2: tuning c0 to get min. residual
     c = (0.000409*s^2+0.1405*s-0.099)/c0;
-    c=1;
+    %c=1;
     f = [x4; x5; x6;
          c*g*( sind(yaw)*sind(rol) + cosd(yaw)*cosd(rol)*sind(pit) );
          c*g*( sind(yaw)*cosd(rol)*sind(pit) -cosd(yaw)*sind(rol) );
@@ -135,12 +137,19 @@ for k = 45 : length(zm)
     x_k1 = [Ex_k(1,k+1) Ex_k(2,k+1) Ex_k(3,k+1) 0 0 0 Ex_k(7,k+1)]';
     z_k1 = [xm(k) ym(k) zm(k) yawm(k)]';
     
+    % part2 compute c0
+    S = sum( (z_k1(1:3)-x_k1(1:3)).^2 );
+    i_sum = i_sum+1;
+    
     %update K and P(+)
     K = P_k(:,:,k+1) * H'/(H*P_k(:,:,k+1)*H'+R);
     P_k(:,:,k+1) = (eye(length(Ex0)) - K*H)*P_k(:,:,k+1);
     Ex_k(:,k+1) = Ex_k(:,k+1) + K*(z_k1 - H*x_k1);
     
 end
+
+% get average of S (part2)
+S_ave = S/i_sum;
 
 %figure;
 hold on;
