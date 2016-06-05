@@ -9,15 +9,13 @@ clear all;
 
 load dataSet2.mat;
 
-plot(yaw, 'DisplayName', 'measure yaw');
-
 % set environment parameter
 Ts = 0.1;
 g = 9.81;
 s_pnt = 1;
 
-R = [1 0 0;
-     0 1 0;
+R = [.1 0 0;
+     0 .1 0;
      0 0 1];
  
  Q = eye(3);
@@ -25,8 +23,8 @@ R = [1 0 0;
  % setting initial x_0, P_0
 x0 = xm(s_pnt);
 y0 = ym(s_pnt);
-dx0 = 0;%(xm(s_pnt+1)-xm(s_pnt))/Ts;
-dy0 = 0;%(ym(s_pnt+1)-ym(s_pnt))/Ts;
+dx0 = (xm(s_pnt+1)-xm(s_pnt))/Ts;
+dy0 = (ym(s_pnt+1)-ym(s_pnt))/Ts;
 yaw0 = yaw(s_pnt);
 Ex0 = [x0 y0 dx0 dy0 yaw0]';
 
@@ -42,23 +40,28 @@ Px0(4,2) = Px0(2,4);
 Ex_k = zeros(length(Ex0), length(xm)+1);
 P_k = zeros(length(Ex0), length(Ex0), length(xm)+1);
 
+% catch corrupt data and compute residual
+S = 0;  % compute the average of residual
+i_sum = 0;
+corrupt_yaw = [];    % 1st parameter is time point, 2nd is the value of corrupt measurement yaw 
+
+
 % Use Extend Kalman Filter (EKF)
 Ex_k(:,s_pnt) = Ex0;
 P_k(:,:,s_pnt) = Px0;
 
-% start from 45
 for k = s_pnt : length(xm)
     % Prediction
     % discrete method
-    if k == 61
-        continue;
-    end
+%     if k == 61
+%         continue;
+%     end
     
     x3 = Ex_k(3, k);     
     x4 = Ex_k(4, k);
     rol = roll(k);
     pit = pitch(k);
-    yaw_k = yaw(k);
+    x5 = yaw(k);
     
     s = (255/6000) * thrust(k);
     c0 = 10000; % Part2: tuning c0 to get min. residual
@@ -66,21 +69,21 @@ for k = s_pnt : length(xm)
     c = 1;
     
     f = [x3; x4;
-         c*g*( sind(yaw_k)*sind(rol) + cosd(yaw_k)*cosd(rol)*sind(pit) );
-         c*g*( sind(yaw_k)*cosd(rol)*sind(pit) -cosd(yaw_k)*sind(rol) );
+         c*g*( sind(x5)*sind(rol) + cosd(x5)*cosd(rol)*sind(pit) );
+         c*g*( sind(x5)*cosd(rol)*sind(pit) -cosd(x5)*sind(rol) );
          0]*Ts;
     
      phi = [1 0 Ts 0 0;
             0 1 0 Ts 0;
-            0 0 1 0 0;
-            0 0 0 1 0;
+            0 0 1 0 Ts*c*g*( cosd(x5)*sind(rol)-sind(x5)*cosd(rol)*sind(pit) );
+            0 0 0 1 Ts*c*g*( cosd(x5)*cosd(rol)*sind(pit)+sind(x5)*sind(pit) );
             0 0 0 0 1];
         
     ga = [0 0 0;
           0 0 0;
           1*sqrt(Ts) 0 0;
           0 1*sqrt(Ts) 0;
-          0 0 1*sqrt(Ts)];
+          0 0 .5*sqrt(Ts)];
         
     Ex_k(:, k+1) = Ex_k(:, k)+f;
     P_k(:,:,k+1) = phi*P_k(:,:,k)*phi'+ ga*Q*ga'; 
@@ -92,6 +95,17 @@ for k = s_pnt : length(xm)
     
     x_k1 = [Ex_k(1,k+1) Ex_k(2,k+1) 0 0 Ex_k(5,k+1)]';
     z_k1 = [xm(k) ym(k) yaw(k)]';
+    
+    if sum( (z_k1(1:3)-x_k1([1:2,5])).^2 ) < -490
+        % ignore the corrupted measurement of yaw
+        x_k1 = [Ex_k(1,k+1) Ex_k(2,k+1) 0 0 0]';
+        z_k1 = [xm(k) ym(k) 0]';
+        corrupt_yaw = [corrupt_yaw; k, yaw(k)];
+    end
+    
+    % compute the total of residual
+    S = S + sum( (z_k1(1:3)-x_k1([1:2,5])).^2 );
+    i_sum = i_sum+1;
   
     %update K and P(+)
     K = P_k(:,:,k+1) * H'/(H*P_k(:,:,k+1)*H'+R);
@@ -100,9 +114,17 @@ for k = s_pnt : length(xm)
     
 end
 
+% get average of residual
+S_ave = S/i_sum;
+
+figure;
+plot(yaw, 'DisplayName', 'measure \psi');
 hold on;
-plot(Ex_k(5,:), 'r','DisplayName', 'predict yaw');
-legend show
+plot(Ex_k(5,:), 'r','DisplayName', 'predict \psi');
+if isempty(corrupt_yaw) == 0
+    plot(corrupt_yaw(:,1), corrupt_yaw(:,2), 'bo', 'MarkerFaceColor', 'green', 'DisplayName', 'corrupted \psi');
+end
+legend('show', 'Location', 'NorthWest');
 
 figure
 plot(xm, 'DisplayName','meausre x');
@@ -114,4 +136,10 @@ figure
 plot(ym, 'DisplayName','meausre y');
 hold on
 plot(Ex_k(2,:),'r','DisplayName','predict y');
+legend show
+
+figure
+plot(xm, ym, 'DisplayName', 'measure x y');
+hold on
+plot(Ex_k(1,:), Ex_k(2,:), 'r','DisplayName','predict x y')
 legend show

@@ -4,11 +4,13 @@
 
 ##TODO:
 
-- [ ] Second order KF for Project 1
-- [ ] Questions of the eqn. discrete EKF
+- [x] Second order KF for Project 1
+    > sof is more sensitive to the changing of the variance, so sof will diverge easily.
+- [x] Questions of the eqn. discrete EKF
+    > could read Probabilistic Robotics to get more examples for discrete EKF.
 - [ ] Write the report of Project 1
-- [ ] Project 2 Part 1
+- [x] Project 2 Part 1
 - [ ] Project 2 Part 2
-- [ ] Project 2 Part 3
+- [x] Project 2 Part 3
 - [ ] Write the report of Project 2
 
