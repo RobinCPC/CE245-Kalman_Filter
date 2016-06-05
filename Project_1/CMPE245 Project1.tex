@@ -1,0 +1,83 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{epstopdf}
+
+\begin{document}
+\begin{center}
+CMPE245 Project 1
+\end{center}
+Chien-Pin Chen\\
+06/07/2016\\
+
+For equation 1, I can rewrite as:
+
+In Extend Kalman Filter, the system model (equation 1 and 2) of the project 1 could refer to:
+
+\begin{equation}
+	\underline{x}_{k + 1}  = \underline{f}_k (\underline{x}_k ,\underline{w}_k )
+\end{equation}
+
+then, for computing, I could set:
+\begin{equation}
+	\begin{array}{l}
+	\underline{x}_{k + 1}  = \underline{f}_k (\hat{\underline{x}}_k ,0) \\ 
+	 \underline{x}_{k + 1}  = \left[ {\begin{array}{*{20}c}
+	   {\underline{x}_1 (k + 1)}  \\
+	   {\underline{x}_2 (k + 1)}  \\
+	   {\underline{x}_3 (k + 1)}  \\
+	   {\underline{x}_4 (k + 1)}  \\
+	\end{array}} \right] = \left[ {\begin{array}{*{20}c}
+	   {\underline{x}_1 (k) + \Delta t \cdot x_3 \cos x_4 }  \\
+	   {\underline{x}_2 (k) + \Delta t \cdot x_3 \sin x_4 }  \\
+	   {\underline{x}_3 (k)}  \\
+	   {\underline{x}_4 (k)}  \\
+	\end{array}} \right] \\ 
+	 \end{array}
+\end{equation}
+\begin{equation}
+	\underline{\Phi} _k  = \frac{{\partial \underline{f}_k (\hat{\underline{x}}_k ,0)}}{{\partial \underline{x}_k }} = \left[ {\begin{array}{*{20}c}
+	   0 & 0 & {\Delta t \cdot \cos x_4 } & { - \Delta t \cdot x_3 \sin x_4 }  \\
+	   0 & 0 & {\Delta t \cdot \sin x_4 } & {\Delta t \cdot x_3 \cos x_4 }  \\
+	   0 & 0 & 1 & 0  \\
+	   0 & 0 & 0 & 1  \\
+	\end{array}} \right]
+\end{equation}
+\begin{equation}
+	\underline{\Gamma}_k  = \frac{{\partial \underline{f}_k (\hat{\underline{x}}_k ,0)}}{{\partial \underline{w}_k }} = \left[ {\begin{array}{*{20}c}
+	   {\begin{array}{*{20}c}
+	   0  \\
+	   0  \\
+	   {\delta _v \sqrt {dt} }  \\
+	   0  \\
+	\end{array}} & {\begin{array}{*{20}c}
+	   0  \\
+	   0  \\
+	   0  \\
+	   {\delta _v \sqrt {dt} }  \\
+	\end{array}}  \\
+	\end{array}} \right]
+\end{equation}
+\begin{equation}
+\underline{Q}=\left[ \begin{array}{cc}
+1 & 0 \\ 
+0 & 1
+\end{array}\right]  
+\end{equation}
+And, the measurement model (equation 3) of the project 1 could refer to:
+\begin{equation}
+	\underline{y}_k = \underline{h}_k(\underline{x}_k) + \underline{v}_k
+\end{equation}
+then, for computing, I could set:
+\begin{equation}
+	\underline{{\rm H}}_k  = \frac{{\partial \underline{h}_k (\hat{\underline{x}}_k (-))}}{{\partial x_k }} = \left[ {\begin{array}{*{20}c}
+	   {\begin{array}{*{20}c}
+	   1 & 0 & 0 & 0  \\
+	\end{array}}  \\
+	   {\begin{array}{*{20}c}
+	   0 & 1 & 0 & 0  \\
+	\end{array}}  \\
+	\end{array}} \right]
+\end{equation}
+
+\end{document}
