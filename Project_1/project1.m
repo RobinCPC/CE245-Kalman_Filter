@@ -9,7 +9,7 @@ clear all;
 
 % setting prediction function (continue or discrete)
 is_cont = 0;    % 1=true; 0=false
-is_sof = 0;     % use second order filter
+is_sof = 1;     % use second order filter
 
 light_noise = 0.364;
 mea_var = 3 * ((light_noise)^2)/9;
@@ -33,15 +33,15 @@ T = 1/3;   % 30 frames per sec, data are acquired per 10 frames
 b = [0 0 1 1]';
 ga = [ 0 0;
        0 0;
-       1 0;
-       0 1];
-Q = [0.1*T 0;
-     0 0.1*T]; % if Q too small, sof will fail
+       sqrt(T) 0;
+       0 sqrt(T)];
+Q = [1.5 0;
+     0 .1]; % if Q too big, sof will fail
    
 H = [1 0 0 0;
      0 1 0 0];
-R = [1.225 0;
-     0 1.225]; % if R too small, sof will fail
+R = [1.225/4 0;
+     0 1.225/2]; % if R too small, sof will fail
 
  
 % setting initial x_0, P_0  
