@@ -16,9 +16,9 @@ title('xm,ym,zm');
 %c = 1e-16;
 g = 9.81;
 
-R = [1 0 0 0;
-     0 1 0 0;
-     0 0 0.1 0;
+R = [.1^2 0 0 0;
+     0 .1^2 0 0;
+     0 0 .1^2 0;
      0 0 0 1];
 %eye(4)*1.225*1; 
 % [12.25 0;
@@ -43,7 +43,7 @@ dz0 = (zm(45)-zm(44))/dtrec(45);
 yaw0 = yawm(45);
 Ex0 = [ x0 y0 z0 dx0 dy0 dz0 yaw0]';
 
-P11 = 1.225*.01;    % var{x}
+P11 = 1.225*2;    % var{x}
 P22 = P11;      % var{y}
 P33 = P11;      % var{z}
 P12 = 0;        % temp set to zero
@@ -60,6 +60,7 @@ Px0(2,5) = 2*P11/(0.0085^2);
 Px0(5,2) = Px0(2,5);
 Px0(3,6) = 2*P11/(0.0085^2);
 Px0(6,3) = Px0(3,6);
+Px0(7,7) = 2^2;
 
 % array to storge E{x_k} and P_k after update 
 Ex_k = zeros(length(Ex0), length(xm)+1);
@@ -85,7 +86,7 @@ for k = 45 : length(zm)
     x6 = Ex_k(6, k);
     rol = roll(k);
     pit = pitch(k);
-    yaw = yawm(k);
+    x7 = yawm(k);
     dt = dtrec(k);
     
     s = (255/6000) * thrust(k);
@@ -93,8 +94,8 @@ for k = 45 : length(zm)
     c = (0.000409*s^2+0.1405*s-0.099)/c0;
     %c=1;
     f = [x4; x5; x6;
-         c*g*( sind(yaw)*sind(rol) + cosd(yaw)*cosd(rol)*sind(pit) );
-         c*g*( sind(yaw)*cosd(rol)*sind(pit) -cosd(yaw)*sind(rol) );
+         c*g*( sind(x7)*sind(rol) + cosd(x7)*cosd(rol)*sind(pit) );
+         c*g*( sind(x7)*cosd(rol)*sind(pit) -cosd(x7)*sind(rol) );
          c*(g*cosd(rol)*cosd(pit) - g);
          0]*dt; 
 % [c*g*( sin(yaw)*sin(rol) + cos(yaw)*cos(rol)*sin(pit) );
@@ -107,8 +108,8 @@ for k = 45 : length(zm)
     phi = [1 0 0 dt 0 0 0;
            0 1 0 0 dt 0 0;
            0 0 1 0 0 dt 0;
-           0 0 0 1 0 0 0;
-           0 0 0 0 1 0 0;
+           0 0 0 1 0 0 dt*c*g*( cosd(x7)*sind(rol)-sind(x7)*cosd(rol)*sind(pit) );
+           0 0 0 0 1 0 dt*c*g*( cosd(x7)*cosd(rol)*sind(pit)+sind(x7)*sind(pit) );
            0 0 0 0 0 1 0;
            0 0 0 0 0 0 1];
     
@@ -121,10 +122,10 @@ for k = 45 : length(zm)
     ga = [0 0 0 0;
           0 0 0 0;
           0 0 0 0;
-          10*sqrt(dt) 0 0 0;
-          0 10*sqrt(dt) 0 0;
-          0 0 1*sqrt(dt) 0;
-          0 0 0 1*sqrt(dt)];
+          .1*sqrt(dt) 0 0 0;
+          0 .1*sqrt(dt) 0 0;
+          0 0 .1*sqrt(dt) 0;
+          0 0 0 0.01*sqrt(dt)];
     
     Ex_k(:, k+1) = Ex_k(:, k)+f;
     P_k(:,:,k+1) = phi*P_k(:,:,k)*phi'+ ga*Q*ga';
@@ -138,7 +139,7 @@ for k = 45 : length(zm)
     z_k1 = [xm(k) ym(k) zm(k) yawm(k)]';
     
     % part2 compute c0
-    S = sum( (z_k1(1:3)-x_k1(1:3)).^2 );
+    S = S + sum( (z_k1(1:3)-x_k1(1:3)).^2 );
     i_sum = i_sum+1;
     
     %update K and P(+)
@@ -180,6 +181,16 @@ plot(yawm, 'DisplayName','meausre yaw');
 hold on
 plot(Ex_k(7,:),'r','DisplayName','predict yaw');
 legend show
+
+
+% plot variance of expected yaw
+var_z = reshape(P_k(3,3,:), 1, []);
+var_yaw = reshape(P_k(7,7,:), 1, []);
+figure
+plot(var_yaw, 'DisplayName','VAR \psi');
+hold on
+plot(var_z, 'DisplayName','VAR z');
+
 
 % f = [c*g*( sin(yaw)*sin(rol) + cos(yaw)*cos(rol)*sin(pit) );
 %      c*g*( -1*cos(yaw)*sin(rol) + sin(yaw)*cos(rol)*sin(pit) );
