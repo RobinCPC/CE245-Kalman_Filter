@@ -49,7 +49,7 @@ R = [light_noise^2 0;
 % setting initial x_0, P_0  
 x0 = z_k(1,1);
 y0 = z_k(1,2);
-v0 = sqrt( (z_k(2,1)-z_k(1,1))^2 + (z_k(2,2)-z_k(1,2))^2 )/ T;
+v0 = -sqrt( (z_k(2,1)-z_k(1,1))^2 + (z_k(2,2)-z_k(1,2))^2 )/ T;
 theta0 = atan2( (z_k(2,2)-z_k(1,2)), (z_k(2,1)-z_k(1,1))  );
 
 Ex0 = [ x0 y0 v0 theta0 ]';   %
@@ -110,8 +110,8 @@ for k = 1 : length(z_k)
         x3 = Ex_k(3, k);
         x4 = Ex_k(4, k);
         f = [T*x3*cos(x4); T*x3*sin(x4); 0; 0];  % ? is this correct?
-        phi = [0, 0, T*cos(x4), -T*x3*sin(x4);   % ? is this correct?
-             0, 0, T*sin(x4), T*x3*cos(x4);
+        phi = [1, 0, T*cos(x4), -T*x3*sin(x4);   % ? is this correct?
+             0, 1, T*sin(x4), T*x3*cos(x4);
              0, 0, 1, 0;
              0, 0, 0, 1];
         
