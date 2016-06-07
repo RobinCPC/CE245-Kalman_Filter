@@ -53,9 +53,6 @@ P_k(:,:,s_pnt) = Px0;
 for k = s_pnt : length(xm)
     % Prediction
     % discrete method
-%     if k == 61
-%         continue;
-%     end
     
     x3 = Ex_k(3, k);     
     x4 = Ex_k(4, k);
@@ -96,7 +93,7 @@ for k = s_pnt : length(xm)
     x_k1 = [Ex_k(1,k+1) Ex_k(2,k+1) 0 0 Ex_k(5,k+1)]';
     z_k1 = [xm(k) ym(k) yaw(k)]';
     
-    if sum( (z_k1(1:3)-x_k1([1:2,5])).^2 ) < -490
+    if sum( (z_k1(1:3)-x_k1([1:2,5])).^2 ) > 498.16
         % ignore the corrupted measurement of yaw
         x_k1 = [Ex_k(1,k+1) Ex_k(2,k+1) 0 0 0]';
         z_k1 = [xm(k) ym(k) 0]';
@@ -118,25 +115,42 @@ end
 S_ave = S/i_sum;
 
 figure;
-plot(yaw, 'DisplayName', 'measure \psi');
+plot(Ex_k(5,:), '--','DisplayName', 'Predicted Yaw (\psi)');
 hold on;
-plot(Ex_k(5,:), 'r','DisplayName', 'predict \psi');
+plot(yaw, 'r','DisplayName', 'Measurement Yaw (\psi)');
 if isempty(corrupt_yaw) == 0
-    plot(corrupt_yaw(:,1), corrupt_yaw(:,2), 'bo', 'MarkerFaceColor', 'green', 'DisplayName', 'corrupted \psi');
+    plot(corrupt_yaw(:,1), corrupt_yaw(:,2), 'bo', 'MarkerFaceColor', 'green', 'DisplayName', 'Corrupted Yaw (\psi)');
 end
+xlabel('Time (sec)','FontSize',12,'FontName','Times');
+ylabel('Angle (degree)','FontSize',12,'FontName','Times');
+h_f1 = gca;         % get handle value (pointer) of above canvs
+set(h_f1, 'fontsize', 12, 'FontName','Times');
 legend('show', 'Location', 'NorthWest');
+title('Yaw angle (\psi)','FontSize',16)
 
 figure
-plot(xm, 'DisplayName','meausre x');
+subplot(2,1,1);
+plot(Ex_k(1,:),'--','DisplayName','Predicted X');
 hold on
-plot(Ex_k(1,:),'r','DisplayName','predict x');
-legend show
+plot(xm, 'r', 'DisplayName','Measurement X');
+xlabel('Time (sec)','FontSize',12,'FontName','Times');
+ylabel('X (M)','FontSize',12,'FontName','Times');
+h_f2 = gca;         % get handle value (pointer) of above canvs
+set(h_f2, 'fontsize', 12, 'FontName','Times');
+legend show;
+title('X position','FontSize',16);
 
-figure
-plot(ym, 'DisplayName','meausre y');
+subplot(2,1,2);
+plot(Ex_k(2,:),'--','DisplayName','Predicted Y');
 hold on
-plot(Ex_k(2,:),'r','DisplayName','predict y');
-legend show
+plot(ym, 'r','DisplayName','Measurement Y');
+xlabel('Time (sec)','FontSize',12,'FontName','Times');
+ylabel('Y (M)','FontSize',12,'FontName','Times');
+h_f3 = gca;         % get handle value (pointer) of above canvs
+set(h_f3, 'fontsize', 12, 'FontName','Times');
+legend show;
+title('Y position','FontSize',16);
+
 
 figure
 plot(xm, ym, 'DisplayName', 'measure x y');
