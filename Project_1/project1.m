@@ -9,17 +9,16 @@ clear all;
 
 % setting prediction function (continue or discrete)
 is_cont = 0;    % 1=true; 0=false
-is_sof = 1;     % use second order filter
+is_sof = 0;     % 1: use second order filter
 
-light_noise = 0.364;
+light_noise = 0.378;%0.364; (std of the position of LED)
 mea_var = 3 * ((light_noise)^2)/9;
 
 % read the measurement data
 z_k = load('XYData_cm.csv'); %xlsread('XYData_cm.csv'); % another functio to use: dataset
 th_k = load('HEadingAngle_rad.csv');
 
-figure;
-plot( z_k(:,1), z_k(:,2));
+
 
 %%  EKF
 T = 1/3;   % 30 frames per sec, data are acquired per 10 frames
@@ -31,17 +30,20 @@ T = 1/3;   % 30 frames per sec, data are acquired per 10 frames
 %      0, 0, 0, 0];
 
 b = [0 0 1 1]';
+
+dv2 = 1;  % modify \delta_v^2 here
+dw2 = 1;  % modify \delta_\theta^2 here
 ga = [ 0 0;
        0 0;
-       sqrt(T) 0;
-       0 sqrt(T)];
-Q = [1.5 0;
-     0 .1]; % if Q too big, sof will fail
+       sqrt(dv2)*sqrt(T) 0;
+       0 sqrt(dw2)*sqrt(T)];  % if dV dTheta too big, sof will fail
+Q = [1 0;
+     0 1];
    
 H = [1 0 0 0;
      0 1 0 0];
-R = [1.225/4 0;
-     0 1.225/2]; % if R too small, sof will fail
+R = [light_noise^2 0;
+     0 light_noise^2]; % if R too small, sof will fail
 
  
 % setting initial x_0, P_0  
@@ -52,14 +54,14 @@ theta0 = atan2( (z_k(2,2)-z_k(1,2)), (z_k(2,1)-z_k(1,1))  );
 
 Ex0 = [ x0 y0 v0 theta0 ]';   %
 
-P11 = 0.0640/1; %0.0328;    % var{x}
+P11 = mea_var/1; %0.0328;    % var{x}
 P22 = P11;    % var{y}
 P33 = 2*P11/T^2;    % var{v}
 P44 = (10*pi/180)^2 %(180/pi)*2*P11;    % var{theta} angle_variance
 P12 = 0;
 P13 = P11;
 P14 = P11;
-P23 = 0;
+P23 = P11;
 P24 = P11;
 P34 = 0;
 
@@ -147,8 +149,9 @@ for k = 1 : length(z_k)
     %update K and P(+)
     if is_sof
         S = zeros(2);
-        K = P_k(:,:,k+1) * H'*inv(R + S);
         P_k(:,:,k+1) = P_k(:,:,k+1)-P_k(:,:,k+1)*H'*inv(H*P_k(:,:,k+1)*H'+R+S)*H*P_k(:,:,k+1);
+        K = P_k(:,:,k+1) * H'*inv(R + S);
+        
         Ex_k(:,k+1) = Ex_k(:,k+1) + K*(z_k(k,:)' - H*Ex_k(:,k+1));
         Ex_k(4,k+1) = wrapToPi(Ex_k(4,k+1));
     else
@@ -181,8 +184,10 @@ end
 % ploting measurement x_m and the EKF estimated x(t)
 t = (0: T: T* length(z_k));
 
+figure;
+plot( z_k(:,1), z_k(:,2), 'r', 'DisplayName','Measurement Position');
 hold on
-plot(Ex_k(1,:),Ex_k(2,:), 'g');
+plot(Ex_k(1,:),Ex_k(2,:), '--', 'DisplayName','Predicted Position');
 if is_cont
     plot(tot_X(:,1),tot_X(:,2), 'r')
     figure
@@ -203,3 +208,43 @@ else
     legend show
     title('heading angle')
 end
+
+%% plot the results in one figure for report
+figure;
+subplot(2,2,[1 3]);
+plot(Ex_k(1,:),Ex_k(2,:), '--', 'DisplayName','Predicted Position');
+hold on
+plot( z_k(:,1), z_k(:,2), 'r', 'DisplayName','Measurement Position');
+axis equal;
+xlim([0 50]);
+ylim([5 40]);
+xlabel('X (cm)','FontSize',12,'FontName','Times');
+ylabel('Y (cm)','FontSize',12,'FontName','Times');
+dis_text = ['\delta_v^2=', num2str(dv2), ', \delta_\theta^2=', num2str(dw2)];
+text(2, 37, dis_text,'FontSize',16,'FontName','Times');
+h_f1 = gca;         % get handle value (pointer) of above canvs
+set(h_f1, 'fontsize', 12, 'FontName','Times');
+legend('show');
+title('Robot Position','FontSize',16)
+
+subplot(2,2,2);
+plot(t, Ex_k(4,:), '--', 'DisplayName','\theta angle')
+hold on
+plot(t(1,1:end-1), th_k','r', 'DisplayName','\alpha angle')
+xlabel('Time (sec)','FontSize',12,'FontName','Times');
+ylabel('Angle (degree)','FontSize',12,'FontName','Times');
+h_f2 = gca;         % get handle value (pointer) of above canvs
+set(h_f2, 'fontsize', 12, 'FontName','Times');
+legend('show')
+title('heading angle','FontSize',16)
+
+subplot(2,2,4);
+plot(t, Ex_k(3,:), '--', 'DisplayName','Predicted velocity')
+hold on
+plot(t, v_k(1,:), 'r', 'DisplayName','Measurement velocity')
+xlabel('Time (sec)','FontSize',12,'FontName','Times');
+ylabel('Velocity (cm/s)','FontSize',12,'FontName','Times');
+h_f3 = gca;         % get handle value (pointer) of above canvs
+set(h_f3, 'fontsize', 12, 'FontName','Times');
+legend('show','Location','SouthWest');
+title('Robot Velocity','FontSize',16)
