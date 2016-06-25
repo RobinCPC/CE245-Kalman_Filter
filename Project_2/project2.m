@@ -7,29 +7,18 @@
 % --------------------------
 clear all;
 
+%laod data
 load data3D.mat;
 
 
-
-%T = 0.1;
-%c = 1e-16;
+% setting parameter
 g = 9.81;
 
 R = [.1^2 0 0 0;
      0 .1^2 0 0;
      0 0 .1^2 0;
      0 0 0 1];
-%eye(4)*1.225*1; 
-% [12.25 0;
-%      0 12.25]; % do we get this ?? or guess by ourself
 
-% ga = [0 0 0 0;
-%       0 0 0 0;
-%       0 0 0 0;
-%       sqrt(T) 0 0 0;
-%       0 sqrt(T) 0 0;
-%       0 0 sqrt(T) 0;
-%       0 0 0 sqrt(T)];
 Q = eye(4);
 
 % setting initial x_0, P_0
@@ -58,9 +47,7 @@ P45 = 0;        % temp set to zero
 P46 = 0;        % temp set to zero
 P56 = 0;        % temp set to zero
 Px0 = eye(length(Ex0)) * P11;
-% Px0 = [P11 P12 P13;
-%        P12 P22 P23;
-%        P13 P23 P33];
+
 Px0(4,4) = 2*P11/(0.0085^2);
 Px0(5,5) = 2*P11/(0.0085^2);
 Px0(6,6) = 2*P11/(0.0085^2);
@@ -87,10 +74,6 @@ P_k(:,:,45) = Px0;
 for k = 45 : length(zm)
     % Prediction
     % discrete method
-    
-%     pit = Ex_k(4, k);
-%     rol = Ex_k(5, k);
-%     yaw = Ex_k(6, k);
 
     x4 = Ex_k(4, k);     
     x5 = Ex_k(5, k);
@@ -101,20 +84,14 @@ for k = 45 : length(zm)
     dt = dtrec(k);
     
     s = (255/6000) * thrust(k);
-    c0 = 5*1e+4; % Part2: tuning c0 to get min. residual
+    c0 = 1e+4; % Part2: tuning c0 to get min. residual
     c = (0.000409*s^2+0.1405*s-0.099)/c0;
-    c = 1;
+    % c = 1; % uncomment for part1
     f = [x4; x5; x6;
          c*g*( sind(x7)*sind(rol) + cosd(x7)*cosd(rol)*sind(pit) );
          c*g*( sind(x7)*cosd(rol)*sind(pit) -cosd(x7)*sind(rol) );
          c*(g*cosd(rol)*cosd(pit) - g);
          0]*dt; 
-% [c*g*( sin(yaw)*sin(rol) + cos(yaw)*cos(rol)*sin(pit) );
-%  c*g*( -1*cos(yaw)*sin(rol) + sin(yaw)*cos(rol)*sin(pit) );
-%  c*g*cos(rol)*cos(pit) - g;
-%  0;
-%  0;
-%  0];
     
     phi = [1 0 0 dt 0 0 0;
            0 1 0 0 dt 0 0;
@@ -124,12 +101,6 @@ for k = 45 : length(zm)
            0 0 0 0 0 1 0;
            0 0 0 0 0 0 1];
     
-% [0, 0, 0, c*g*cos(pit)*cos(rol)*cos(yaw),  c*g*(cos(rol)*sin(yaw) - cos(yaw)*sin(pit)*sin(rol)), c*g*(cos(yaw)*sin(rol) - cos(rol)*sin(pit)*sin(yaw)) ;
-% 0, 0, 0, c*g*cos(pit)*cos(rol)*sin(yaw),  c*g*(-cos(rol)*cos(yaw) + sin(pit)*sin(rol)*sin(yaw)), c*g*(sin(rol)*sin(yaw) + cos(rol)*cos(yaw)*sin(pit)) ;
-% 0, 0, 0,     -c*g*cos(rol)*sin(pit),                     -c*g*cos(pit)*sin(rol),                                          0 ;
-% 0, 0, 0, 1, 0, 0;
-% 0, 0, 0, 0, 1, 0;
-% 0, 0, 0, 0, 0, 1];
     ga = [0 0 0 0;
           0 0 0 0;
           0 0 0 0;

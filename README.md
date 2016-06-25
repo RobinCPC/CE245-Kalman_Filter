@@ -12,5 +12,5 @@
 - [x] Project 2 Part 1
 - [x] Project 2 Part 2
 - [x] Project 2 Part 3
-- [ ] Write the report of Project 2
+- [x] Write the report of Project 2
 

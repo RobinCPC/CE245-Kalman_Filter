@@ -23,12 +23,6 @@ th_k = load('HEadingAngle_rad.csv');
 %%  EKF
 T = 1/3;   % 30 frames per sec, data are acquired per 10 frames
 
-% f = [x3*cos(x4); x3*sin(x4); 0; 0];
-% phi = [0, 0, cos(x4), -x3*sin(x4);
-%      0, 0, sin(x4), x3*cos(x4);
-%      0, 0, 0, 0;
-%      0, 0, 0, 0];
-
 b = [0 0 1 1]';
 
 dv2 = 1;  % modify \delta_v^2 here
@@ -52,12 +46,12 @@ y0 = z_k(1,2);
 v0 = -sqrt( (z_k(2,1)-z_k(1,1))^2 + (z_k(2,2)-z_k(1,2))^2 )/ T;
 theta0 = atan2( (z_k(2,2)-z_k(1,2)), (z_k(2,1)-z_k(1,1))  );
 
-Ex0 = [ x0 y0 v0 theta0 ]';   %
+Ex0 = [ x0 y0 v0 theta0 ]';   % Initial expected x
 
-P11 = mea_var/1; %0.0328;    % var{x}
-P22 = P11;    % var{y}
+P11 = mea_var/1;    % var{x}
+P22 = P11;          % var{y}
 P33 = 2*P11/T^2;    % var{v}
-P44 = (10*pi/180)^2 %(180/pi)*2*P11;    % var{theta} angle_variance
+P44 = (10*pi/180)^2;% var{theta} angle_variance
 P12 = 0;
 P13 = P11;
 P14 = P11;
@@ -77,9 +71,7 @@ v_k = zeros(1,length(z_k)+1);
 
 % Use Extend Kalman Filter (EKF)
 Ex_k(:,1) = Ex0; %[Ex0; Edx0; Ebeta0];
-P_k(:,:,1) = Px0; %[P11 P12 P13;
-                   % P12 P22 P23;
-                   % P13 P23 P33];
+P_k(:,:,1) = Px0; 
 v_k(1,1) = v0;
                    
 if is_cont
@@ -109,8 +101,8 @@ for k = 1 : length(z_k)
         % Discrete method
         x3 = Ex_k(3, k);
         x4 = Ex_k(4, k);
-        f = [T*x3*cos(x4); T*x3*sin(x4); 0; 0];  % ? is this correct?
-        phi = [1, 0, T*cos(x4), -T*x3*sin(x4);   % ? is this correct?
+        f = [T*x3*cos(x4); T*x3*sin(x4); 0; 0];  
+        phi = [1, 0, T*cos(x4), -T*x3*sin(x4);   
              0, 1, T*sin(x4), T*x3*cos(x4);
              0, 0, 1, 0;
              0, 0, 0, 1];
@@ -137,7 +129,7 @@ for k = 1 : length(z_k)
             Ex_k(:, k+1) = Ex_k(:, k)+f+bk;
             P_k(:,:,k+1) = phi*P_k(:,:,k)*phi'+ ga*Q*ga';
         else
-            Ex_k(:, k+1) = Ex_k(:, k)+f;         % ? is this correct?
+            Ex_k(:, k+1) = Ex_k(:, k)+f;         
             P_k(:,:,k+1) = phi*P_k(:,:,k)*phi'+ ga*Q*ga';
         end
     end
@@ -176,9 +168,6 @@ for k = 1 : length(z_k)
         tot_T = cat(1, tot_T, t(2:end));
         tot_X = cat(1, tot_X, solXs(2:end, :));
     end
-%     if k == 7
-%         break;
-%     end
 end
 
 % ploting measurement x_m and the EKF estimated x(t)
